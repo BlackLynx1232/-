@@ -1,0 +1,101 @@
+import tkinter as tk
+import math
+
+def append_to_expression(value):
+    current_text = entry.get()
+    entry.delete(0, tk.END)  # Очищаем текущее содержимое
+    entry.insert(0, current_text + str(value))  # Добавляем новое значение
+
+def calculate():
+    try:
+        # Заменяем 'sqr' на '**' для возведения в степень
+        expression = entry.get().replace('sqr', '**')
+        result = eval(expression)  # Вычисляем выражение
+        entry.delete(0, tk.END)  # Очищаем поле ввода
+        entry.insert(0, result)  # Показываем результат
+    except Exception as e:
+        entry.delete(0, tk.END)
+        entry.insert(0, "Ошибка")  # Обработка ошибок
+
+def clear():
+    entry.delete(0, tk.END)  # Очищаем поле ввода
+
+def create_calculator():
+    # Создаем главное окно
+    root = tk.Tk()
+    root.title("Калькулятор")  # Заголовок окна
+
+    global entry
+    entry = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid")
+    entry.grid(row=0, column=0, columnspan=5, padx=10, pady=10)  # Поле ввода
+
+    # Кнопки с цифрами
+    buttons = [
+        ('7', 1, 1), ('8', 1, 2), ('9', 1, 3),
+        ('4', 2, 1), ('5', 2, 2), ('6', 2, 3),
+        ('1', 3, 1), ('2', 3, 2), ('3', 3, 3),
+        ('0', 4, 2), ('.', 4, 1), ('(', 5, 2),
+        (')', 5, 1)
+    ]
+
+    for (text, row, col) in buttons:
+        button = tk.Button(root, text=text, width=5, height=2, command=lambda t=text: append_to_expression(t))
+        button.grid(row=row, column=col, padx=5, pady=5)
+
+    # Кнопки с математическими операциями
+    operations = [
+        ('+', 1, 0), ('-', 2, 0), ('*', 3, 0), ('/', 4, 0),
+    ]
+
+    for (text, row, col) in operations:
+        button = tk.Button(root, text=text, width=5, height=2, command=lambda t=text: append_to_expression(t))
+        button.grid(row=row, column=col, padx=5, pady=5)
+
+    # Кнопка возведения в степень
+    sqr_button = tk.Button(root, text='^', width=5, height=2, command=lambda: append_to_expression('**'))
+    sqr_button.grid(row=4, column=3, padx=5, pady=5)
+
+    # Кнопки для корней
+    sqrt_button = tk.Button(root, text='√', width=5, height=2, command=lambda: append_to_expression('**(1/2)'))
+    sqrt_button.grid(row=1, column=4, padx=5, pady=5)
+
+    cbrt_button = tk.Button(root, text='∛', width=5, height=2, command=lambda: append_to_expression('**(1/3)'))
+    cbrt_button.grid(row=2, column=4, padx=5, pady=5)
+
+    module_button = tk.Button(root, text='||', width=5, height=2, command=lambda: append_to_expression('abs('))
+    module_button.grid(row=3, column=4, padx=5, pady=5)
+
+    sin_button = tk.Button(root, text='sin', width=5, height=2, command=lambda: append_to_expression('math.sin('))
+    sin_button.grid(row=5, column=4, padx=5, pady=5)
+
+    cos_button = tk.Button(root, text='cos', width=5, height=2, command=lambda: append_to_expression('math.cos('))
+    cos_button.grid(row=6, column=4, padx=5, pady=5)
+
+    tan_button = tk.Button(root, text='tan', width=5, height=2, command=lambda: append_to_expression('math.tan('))
+    tan_button.grid(row=6, column=3, padx=5, pady=5)
+
+    ctg_button = tk.Button(root, text='ctg', width=5, height=2, command=lambda: append_to_expression('1/math.tan('))
+    ctg_button.grid(row=6, column=2, padx=5, pady=5)
+    
+    log_button = tk.Button(root, text='log', width=5, height=2, command=lambda: append_to_expression('math.log('))
+    log_button.grid(row=6, column=1, padx=5, pady=5)
+
+    x_button = tk.Button(root, text='1/x', width=5, height=2, command=lambda: append_to_expression('1/'))
+    x_button.grid(row=6, column=0, padx=5, pady=5)
+
+    minusmodule_button = tk.Button(root, text='-||', width=5, height=2, command=lambda: append_to_expression('-abs('))
+    minusmodule_button.grid(row=4, column=4, padx=5, pady=5)
+
+    # Кнопка равно
+    equals_button = tk.Button(root, text='=', width=5, height=2, command=calculate)
+    equals_button.grid(row=5, column=3, padx=5, pady=5)
+
+    # Кнопка очистки
+    clear_button = tk.Button(root, text='C', width=5, height=2, command=clear)
+    clear_button.grid(row=5, column=0, padx=5, pady=5)
+
+    # Запускаем главный цикл приложения
+    root.mainloop()
+
+if __name__ == "__main__":
+    create_calculator()
