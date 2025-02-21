@@ -1,5 +1,28 @@
 import tkinter as tk
+from tkinter import ttk  # Импортируем ttk для использования combobox
 import math
+
+# Словарь для хранения единиц измерения по типам
+units = {
+    "Длина": ["метры", "километры", "дециметры", "сантиметры", "миллиметры"],
+    "Масса": ["килограммы", "граммы", "тонны", "милиграммы", "центнеры"],
+    "Площадь": ["квадратные метры", "гектары", "акры", "квадратные километры"],
+    "Объём": ["литры", "миллилитры", "кубические метры", "кубические километры"],
+    "Давление": ["паскали", "атмосферы", "бар"],
+    "Скорость": ["метры в секунду", "километры в час", "метры в минуту", "километры в секунду"],
+    "Температура": ["Цельсий", "Фаренгейт", "Кельвин"]
+}
+
+# Основные единицы измерения для конвертации
+primary_units = {
+    "Длина": "метры",
+    "Масса": "граммы",
+    "Площадь": "квадратные метры",
+    "Объём": "кубические метры",
+    "Давление": "бары",
+    "Скорость": "метры в секунду",
+    "Температура": "Цельсий"
+}
 
 def append_to_expression(value):
     current_text = entry.get()
@@ -17,13 +40,232 @@ def calculate():
         entry.delete(0, tk.END)
         entry.insert(0, "Ошибка")  # Обработка ошибок
 
+def remove_last_character():
+    current_text = entry.get()
+    if current_text:  # Проверяем, что поле ввода не пустое
+        entry.delete(0, tk.END)  # Очищаем текущее содержимое
+        entry.insert(0, current_text[:-200])  # Удаляем последний символ
+
 def clear():
-    entry.delete(0, tk.END)  # Очищаем поле ввода
+    # Удаляем все виджеты из окна
+    for widget in root.winfo_children():
+        widget.destroy()
+
+def update_units(event):
+    global type_unit  # Объявляем переменную как глобальную
+    # Обновляем выпадающие списки единиц измерения в зависимости от выбранного типа
+    selected_type = type_unit.get()
+    unit_from['values'] = units[selected_type]
+    unit_to['values'] = units[selected_type]
+    unit_from.current(0)  # Устанавливаем значение по умолчанию
+    unit_to.current(0)  # Устанавливаем значение по умолчанию
+
+def show_converter():
+    # Очищаем текущее содержимое окна
+    clear()
+
+    # Поле ввода для конвертера
+    global entry_from  # Объявляем переменную как глобальную
+    entry_from = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid")
+    entry_from.pack(pady=10)  # Поле ввода для значения
+
+    # Создаем выпадающий список для выбора типа измерения
+    global type_unit  # Объявляем переменную как глобальную
+    type_unit = ttk.Combobox(root, values=list(units.keys()), state='readonly')
+    type_unit.pack(pady=10)
+    type_unit.current(0)  # Устанавливаем значение по умолчанию
+    type_unit.bind("<<ComboboxSelected>>", update_units)  # Обновляем единицы при выборе типа
+
+    # Создаем выпадающий список для выбора единицы измерения
+    global unit_from  # Объявляем переменную как глобальную
+    unit_from = ttk.Combobox(root, values=units[type_unit.get()], state='readonly')
+    unit_from.pack(pady=10)
+    unit_from.current(0)  # Устанавливаем значение по умолчанию
+
+    global entry_to  # Объявляем переменную как глобальную
+    entry_to = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid")
+    entry_to.pack(pady=10)  # Поле вывода для результата
+    entry_to.config(state='readonly')  # Делаем поле вывода недоступным для ввода
+
+    # Создаем выпадающий список для выбора единицы измерения
+    global unit_to  # Объявляем переменную как глобальную
+    unit_to = ttk.Combobox(root, values=units[type_unit.get()], state='readonly')
+    unit_to.pack(pady=10)
+    unit_to.current(0)  # Устанавливаем значение по умолчанию
+
+    # Кнопка для выполнения конвертации (пример)
+    convert_button = tk.Button(root, text="Конвертировать", width=20, height=2, command=lambda: convert_units(entry_from.get(), unit_from.get(), unit_to.get()))
+    convert_button.pack(pady=10)
+
+    # Кнопка для возврата в калькулятор
+    back_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator)
+    back_button.pack(pady=10)
+
+def convert_units(value, from_unit, to_unit):
+    try:
+        # Преобразуем входное значение в основную единицу
+        base_value = float(value)
+
+        # Конвертация в зависимости от типа измерения
+        if type_unit.get() == "Длина":
+            if from_unit == "метры":
+                base_value = base_value
+            elif from_unit == "километры":
+                base_value *= 1000
+            elif from_unit == "дециметры":
+                base_value /= 10
+            elif from_unit == "сантиметры":
+                base_value /= 100
+            elif from_unit == "миллиметры":
+                base_value /= 1000
+
+            if to_unit == "метры":
+                result = base_value
+            elif to_unit == "километры":
+                result = base_value / 1000
+            elif to_unit == "дециметры":
+                result = base_value * 10
+            elif to_unit == "сантиметры":
+                result = base_value * 100
+            elif to_unit == "миллиметры":
+                result = base_value * 1000
+
+        elif type_unit.get() == "Масса":
+            if from_unit == "килограммы":
+                base_value *= 1000
+            elif from_unit == "граммы":
+                base_value = base_value
+            elif from_unit == "тонны":
+                base_value *= 1e6
+            elif from_unit == "милиграммы":
+                base_value /= 1000
+            elif from_unit == "центнеры":
+                base_value *= 100000
+
+            if to_unit == "килограммы":
+                result = base_value / 1000
+            elif to_unit == "граммы":
+                result = base_value
+            elif to_unit == "тонны":
+                result = base_value / 1e6
+            elif to_unit == "милиграммы":
+                result = base_value * 1000
+            elif to_unit == "центнеры":
+                result = base_value / 100000
+
+        elif type_unit.get() == "Площадь":
+            if from_unit == "квадратные метры":
+                base_value = base_value
+            elif from_unit == "гектары":
+                base_value *= 10000
+            elif from_unit == "акры":
+                base_value *= 4046.86
+            elif from_unit == "квадратные километры":
+                base_value *= 1e6
+
+            if to_unit == "квадратные метры":
+                result = base_value
+            elif to_unit == "гектары":
+                result = base_value / 10000
+            elif to_unit == "акры":
+                result = base_value / 4046.86
+            elif to_unit == "квадратные километры":
+                result = base_value / 1e6
+
+        elif type_unit.get() == "Объём":
+            if from_unit == "литры":
+                base_value = base_value
+            elif from_unit == "миллилитры":
+                base_value /= 1000
+            elif from_unit == "кубические метры":
+                base_value *= 1000
+            elif from_unit == "кубические километры":
+                base_value *= 1e9
+
+            if to_unit == "литры":
+                result = base_value
+            elif to_unit == "миллилитры":
+                result = base_value * 1000
+            elif to_unit == "кубические метры":
+                result = base_value / 1000
+            elif to_unit == "кубические километры":
+                result = base_value / 1e9
+
+        elif type_unit.get() == "Давление":
+            if from_unit == "паскали":
+                base_value = base_value
+            elif from_unit == "атмосферы":
+                base_value *= 101325
+            elif from_unit == "бар":
+                base_value *= 100000
+
+            if to_unit == "паскали":
+                result = base_value
+            elif to_unit == "атмосферы":
+                result = base_value / 101325
+            elif to_unit == "бар":
+                result = base_value / 100000
+
+        elif type_unit.get() == "Скорость":
+            if from_unit == "метры в секунду":
+                base_value = base_value
+            elif from_unit == "километры в час":
+                base_value *= (1000 / 3600)
+            elif from_unit == "метры в минуту":
+                base_value /= 60
+            elif from_unit == "километры в секунду":
+                base_value *= 1000
+
+            if to_unit == "метры в секунду":
+                result = base_value
+            elif to_unit == "километры в час":
+                result = base_value * (3600 / 1000)
+            elif to_unit == "метры в минуту":
+                result = base_value * 60
+            elif to_unit == "километры в секунду":
+                result = base_value / 1000
+
+        elif type_unit.get() == "Температура":
+            if from_unit == "Цельсий":
+                if to_unit == "Фаренгейт":
+                    result = (base_value * 9/5) + 32
+                elif to_unit == "Кельвин":
+                    result = base_value + 273.15
+                else:
+                    result = base_value
+            elif from_unit == "Фаренгейт":
+                if to_unit == "Цельсий":
+                    result = (base_value - 32) * 5/9
+                elif to_unit == "Кельвин":
+                    result = (base_value - 32) * 5/9 + 273.15
+                else:
+                    result = base_value
+            elif from_unit == "Кельвин":
+                if to_unit == "Цельсий":
+                    result = base_value - 273.15
+                elif to_unit == "Фаренгейт":
+                    result = (base_value - 273.15) * 9/5 + 32
+                else:
+                    result = base_value
+
+        entry_to.config(state='normal')  # Делаем поле вывода доступным для записи
+        entry_to.delete(0, tk.END)  # Очищаем поле результата
+        entry_to.insert(0, f"{result:.2f}")  # Показываем результат без единицы измерения
+        entry_to.config(state='readonly')  # Снова делаем поле вывода недоступным для ввода
+    except ValueError:
+        entry_to.config(state='normal')  # Делаем поле вывода доступным для записи
+        entry_to.delete(0, tk.END)
+        entry_to.insert(0, "Ошибка ввода")  # Обработка ошибок
+        entry_to.config(state='readonly')  # Снова делаем поле вывода недоступным для ввода
 
 def create_calculator():
-    # Создаем главное окно
-    root = tk.Tk()
-    root.title("Калькулятор")  # Заголовок окна
+    global root
+    # Проверяем, существует ли окно
+    if 'root' not in globals() or root is None or not root.winfo_exists():
+        root = tk.Tk()
+        root.title("Калькулятор")  # Заголовок окна
+
+    clear()  # Очищаем текущее содержимое окна
 
     global entry
     entry = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid")
@@ -91,8 +333,11 @@ def create_calculator():
     equals_button.grid(row=5, column=3, padx=5, pady=5)
 
     # Кнопка очистки
-    clear_button = tk.Button(root, text='C', width=5, height=2, command=clear)
+    clear_button = tk.Button(root, text='C', width=5, height=2, command=remove_last_character)
     clear_button.grid(row=5, column=0, padx=5, pady=5)
+
+    open_button = tk.Button(root, text='Конвертер единиц', width=15, height=2, command=show_converter)
+    open_button.grid(row=7, column=5, padx=5, pady=5)
 
     # Запускаем главный цикл приложения
     root.mainloop()
