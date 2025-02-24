@@ -4,17 +4,17 @@ import math
 
 # Словарь для хранения единиц измерения по типам
 units = {
-    "Длина": ["метры", "километры", "дециметры", "сантиметры", "миллиметры"],
-    "Масса": ["килограммы", "граммы", "тонны", "милиграммы", "центнеры"],
-    "Площадь": ["квадратные метры", "квадратные сантиметры", "квадратные миллиметры", "квадратные дециметры", "гектары", "акры", "квадратные километры"],
-    "Объём": ["литры", "миллилитры", "кубические метры", "кубические сантиметры", "кубические миллиметры", "кубические дециметры", "кубические километры"],
+    "Длина": ["метры", "километры", "дециметры", "сантиметры", "миллиметры", "дюймы", "футы", "мили", "ярды", "нанометры", "морские мили"],
+    "Масса": ["килограммы", "граммы", "тонны", "милиграммы", "центнеры", "гектограммы", "декаграммы", "дециграммы", "унции", "караты", "футы"],
+    "Площадь": ["квадратные метры", "квадратные сантиметры", "квадратные миллиметры", "квадратные дециметры", "гектары", "акры", "квадратные километры", "квадратные футы", "квадратные ярды", "квадратные дюймы", "квадратные мили"],
+    "Объём": ["литры", "миллилитры", "кубические метры", "кубические сантиметры", "кубические миллиметры", "кубические дециметры", "кубические километры", "кубические футы", "кубические дюймы", "кубические мили", "кубические ярды"],
     "Давление": ["паскали", "атмосферы", "бар"],
     "Скорость": ["метры в секунду", "километры в час", "метры в минуту", "километры в секунду"],
     "Температура": ["Цельсий", "Фаренгейт", "Кельвин"],
-    "Мощность": ["ватт", "киловатт", "мегаватт", "гигаватт", "терраватт"],
-    "Энергия": ["джоуль", "килоджоуль", "мегаджоуль", "гигаджоуль", "кВт·ч"],
+    "Энергия": ["джоуль", "килоджоуль", "мегаджоуль", "гигаджоуль", "кВт·ч", "калории", "пищевые калории", "фут-фунты"],
     "Время": ["секунды", "минуты", "часы", "дни", "недели", "месяцы", "годы"],
-    "Данные": ["бит", "байт", "килобайт", "мегабайт", "гигабайт", "террабайт"]
+    "Данные": ["бит", "байт", "килобайт", "мегабайт", "гигабайт", "террабайт"],
+    "Углы": ["градусы", "радианы", "градианы"]
 }
 
 # Основные единицы измерения для конвертации
@@ -29,7 +29,8 @@ primary_units = {
     "Мощность": "ватт",
     "Энергия": "джоуль",
     "Время": "секунды",
-    "Данные": "байт"
+    "Данные": "байт",
+    "Углы": "градусы"
 }
 
 # Коэффициенты перевода для разных единиц измерения
@@ -39,14 +40,26 @@ conversion_factors = {
         "километры": 1000,
         "дециметры": 0.1,
         "сантиметры": 0.01,
-        "миллиметры": 0.001
+        "миллиметры": 0.001,
+        "дюймы": 0.0254,
+        "футы": 0.3048,
+        "мили": 1609.34,
+        "ярды": 0.9144,
+        "нанометры": 1e-9,
+        "морские мили": 1852
     },
     "Масса": {
         "килограммы": 1000,
         "граммы": 1,
         "тонны": 1000000,
         "милиграммы": 0.001,
-        "центнеры": 100000
+        "центнеры": 100000,
+        "гектограммы": 100,
+        "декаграммы": 10,
+        "дециграммы": 0.1,
+        "унции": 28.3495,
+        "караты": 0.2,
+        "футы": 0.453592
     },
     "Площадь": {
         "квадратные метры": 1,
@@ -55,7 +68,11 @@ conversion_factors = {
         "квадратные дециметры": 0.01,
         "гектары": 10000,
         "акры": 4046.86,
-        "квадратные километры": 1000000
+        "квадратные километры": 1000000,
+        "квадратные футы": 0.092903,
+        "квадратные ярды": 0.836127,
+        "квадратные дюймы": 0.00064516,
+        "квадратные мили": 2589988.11
     },
     "Объём": {
         "литры": 1,
@@ -64,7 +81,11 @@ conversion_factors = {
         "кубические сантиметры": 0.000001,
         "кубические миллиметры": 1e-9,
         "кубические дециметры": 1,
-        "кубические километры": 1000000000
+        "кубические километры": 1000000000,
+        "кубические футы": 28.3168,
+        "кубические дюймы": 0.0163871,
+        "кубические мили": 4.168e9,
+        "кубические ярды": 0.764555
     },
     "Давление": {
         "паскали": 1,
@@ -78,19 +99,15 @@ conversion_factors = {
         "километры в секунду": 1000
     },
     "Температура": {},
-    "Мощность": {
-        "ватт": 1,
-        "киловатт": 1000,
-        "мегаватт": 1000000,
-        "гигаватт": 1000000000,
-        "терраватт": 1e12
-    },
     "Энергия": {
         "джоуль": 1,
         "килоджоуль": 1000,
         "мегаджоуль": 1e6,
         "гигаджоуль": 1e9,
-        "кВт·ч": 3600000
+        "кВт·ч": 3600000,
+        "калории": 4.184,
+        "пищевые калории": 4184,
+        "фут-фунты": 1.35582
     },
     "Время": {
         "секунды": 1,
@@ -108,6 +125,11 @@ conversion_factors = {
         "мегабайт": 8388608,
         "гигабайт": 8589934592,
         "террабайт": 8796093022208
+    },
+    "Углы": {
+        "градусы": 1,
+        "радианы": 180 / math.pi,
+        "градианы": 200 / 180
     }
 }
 
@@ -179,6 +201,14 @@ def show_converter():
     back_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
     back_button.pack(pady=10)
 
+    # Кнопка для перехода в режим процентов
+    percent_button = tk.Button(root, text='Проценты', width=15, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
+    percent_button.pack(pady=10)
+
+    # Кнопка для перехода в режим скидок
+    discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    discount_button.pack(pady=10)
+
 def convert_units(value, from_unit, to_unit):
     try:
         base_value = float(value)
@@ -210,7 +240,11 @@ def convert_units(value, from_unit, to_unit):
                     else:
                         result = base_value
             else:
-                result = base_value * conversion_factors[measurement_type][from_unit] / conversion_factors[measurement_type][to_unit]
+                # Конвертация для других типов
+                if measurement_type == "Углы":
+                    result = base_value * (conversion_factors[measurement_type][from_unit] / conversion_factors[measurement_type][to_unit])
+                else:
+                    result = base_value * conversion_factors[measurement_type][from_unit] / conversion_factors[measurement_type][to_unit]
 
             entry_to.config(state='normal')
             entry_to.delete(0, tk.END)
@@ -308,7 +342,167 @@ def create_calculator():
     open_button = tk.Button(root, text='Конвертер единиц', width=15, height=2, command=show_converter, bg='darkgray', relief='raised')
     open_button.grid(row=7, column=5, padx=5, pady=5)
 
+    # Кнопка для перехода в режим процентов
+    percent_button = tk.Button(root, text='Проценты', width=15, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
+    percent_button.grid(row=6, column=5, padx=5, pady=5)
+
+    # Кнопка для перехода в режим скидок
+    discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    discount_button.grid(row=5, column=5, padx=5, pady=5)
+
     root.mainloop()
+
+def show_percentage_calculator():
+    clear()
+
+    global entry_initial
+    entry_initial = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_initial.pack(pady=10)
+
+    global entry_percentage
+    entry_percentage = tk.Entry(root, width=5, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_percentage.pack(side=tk.LEFT, padx=5, pady=10)
+
+    percentage_label = tk.Label(root, text="%", font=('Arial', 24), bg='lightgray')
+    percentage_label.pack(side=tk.LEFT)
+
+    global entry_result
+    entry_result = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_result.pack(pady=10)
+
+    # Новое поле для вывода разницы
+    global entry_difference
+    entry_difference = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_difference.pack(pady=10)
+
+    calculate_button = tk.Button(root, text="Рассчитать", width=20, height=2, command=calculate_percentage, bg='darkgray', relief='raised')
+    calculate_button.pack(pady=10)
+
+    clear_button = tk.Button(root, text="Очистить", width=20, height=2, command=clear_percentage_entries, bg='darkgray', relief='raised')
+    clear_button.pack(pady=10)
+
+    back_button = tk.Button(root, text="Конвертер единиц", width=20, height=2, command=show_converter, bg='darkgray', relief='raised')
+    back_button.pack(pady=10)
+
+    second_back_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
+    second_back_button.pack(pady=10)
+
+    second_discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    second_discount_button.pack(pady=10)  # Изменено на pack
+
+    entry_percentage.bind("<KeyRelease>", validate_percentage)
+
+
+def validate_percentage(event):
+    try:
+        value = float(entry_percentage.get())
+        if value < -100 or value > 100:
+            entry_percentage.delete(0, tk.END)  # Очищаем поле, если значение вне диапазона
+    except ValueError:
+        entry_percentage.delete(0, tk.END)  # Очищаем поле, если введено не число
+
+def calculate_percentage():
+    try:
+        initial_value = float(entry_initial.get())
+        percentage_value = float(entry_percentage.get())
+        result = initial_value * (1 + percentage_value / 100)
+        difference = result - initial_value  # Вычисляем разницу
+
+        entry_result.config(state='normal')
+        entry_result.delete(0, tk.END)
+        entry_result.insert(0, f"{result:.2f}")
+        entry_result.config(state='normal')  # Делаем поле ввода активным
+
+        entry_difference.config(state='normal')
+        entry_difference.delete(0, tk.END)
+        entry_difference.insert(0, f"{difference:.2f}")  # Выводим разницу
+        entry_difference.config(state='normal')  # Делаем поле ввода активным
+    except ValueError:
+        entry_result.config(state='normal')
+        entry_result.delete(0, tk.END)
+        entry_result.insert(0, "Ошибка")  # Если ввод некорректен
+
+def clear_percentage_entries():
+    entry_initial.delete(0, tk.END)  # Очищаем первое поле ввода
+    entry_percentage.delete(0, tk.END)  # Очищаем поле ввода процентов
+    entry_result.delete(0, tk.END)  # Очищаем поле результата
+    entry_difference.delete(0, tk.END)  # Очищаем поле разницы
+
+# Новый режим скидок
+def show_discount_calculator():
+    clear()
+
+    global entry_price
+    entry_price = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_price.pack(pady=10)
+
+    global entry_discount
+    entry_discount = tk.Entry(root, width=5, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_discount.pack(side=tk.LEFT, padx=5, pady=10)
+
+    discount_label = tk.Label(root, text="Скидка (%)", font=('Arial', 24), bg='lightgray')
+    discount_label.pack(side=tk.LEFT)
+
+    global entry_discount_amount
+    entry_discount_amount = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_discount_amount.pack(pady=10)
+
+    global entry_final_price
+    entry_final_price = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_final_price.pack(pady=10)
+
+    # Поле ввода для НДС
+    global entry_vat
+    entry_vat = tk.Entry(root, width=5, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_vat.pack(side=tk.LEFT, padx=5, pady=10)
+
+    vat_label = tk.Label(root, text="НДС (%)", font=('Arial', 24), bg='lightgray')
+    vat_label.pack(side=tk.LEFT)
+
+    calculate_discount_button = tk.Button(root, text="Рассчитать", width=20, height=2, command=calculate_discount, bg='darkgray', relief='raised')
+    calculate_discount_button.pack(pady=10)
+
+    clear_discount_button = tk.Button(root, text="Очистить", width=20, height=2, command=clear_discount_entries, bg='darkgray', relief='raised')
+    clear_discount_button.pack(pady=10)
+
+    back_to_calculator_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
+    back_to_calculator_button.pack(pady=10)
+
+    back_to_converter_button = tk.Button(root, text="Конвертер единиц", width=20, height=2, command=show_converter, bg='darkgray', relief='raised')
+    back_to_converter_button.pack(pady=10)
+
+    back_to_percentage_button = tk.Button(root, text="Проценты", width=20, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
+    back_to_percentage_button.pack(pady=10)
+
+def calculate_discount():
+    try:
+        price = float(entry_price.get())
+        discount = float(entry_discount.get())
+        vat = float(entry_vat.get())  # Получаем значение НДС
+        discount_amount = price * (discount / 100)
+        final_price = price - discount_amount
+        final_price_with_vat = final_price + (final_price * (vat / 100))  # Итоговая цена с учетом НДС
+
+        entry_discount_amount.config(state='normal')
+        entry_discount_amount.delete(0, tk.END)
+        entry_discount_amount.insert(0, f"{discount_amount:.2f}")
+        entry_discount_amount.config(state='normal')  # Делаем поле ввода активным
+
+        entry_final_price.config(state='normal')
+        entry_final_price.delete(0, tk.END)
+        entry_final_price.insert(0, f"{final_price_with_vat:.2f}")  # Выводим итоговую цену с учетом НДС
+        entry_final_price.config(state='normal')  # Делаем поле ввода активным
+    except ValueError:
+        entry_discount_amount.config(state='normal')
+        entry_discount_amount.delete(0, tk.END)
+        entry_discount_amount.insert(0, "Ошибка")  # Если ввод некорректен
+
+def clear_discount_entries():
+    entry_price.delete(0, tk.END)  # Очищаем поле ввода цены
+    entry_discount.delete(0, tk.END)  # Очищаем поле ввода скидки
+    entry_vat.delete(0, tk.END)  # Очищаем поле ввода НДС
+    entry_discount_amount.delete(0, tk.END)  # Очищаем поле суммы скидки
+    entry_final_price.delete(0, tk.END)  # Очищаем поле итоговой цены
 
 if __name__ == "__main__":
     create_calculator()
