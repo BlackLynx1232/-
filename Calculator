@@ -209,6 +209,9 @@ def show_converter():
     discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
     discount_button.pack(pady=10)
 
+    savings_button = tk.Button(root, text='Сбережения', width=15, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
+    savings_button.pack(pady=10)
+
 def convert_units(value, from_unit, to_unit):
     try:
         base_value = float(value)
@@ -350,6 +353,9 @@ def create_calculator():
     discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
     discount_button.grid(row=5, column=5, padx=5, pady=5)
 
+    savings_button = tk.Button(root, text='Сбережения', width=15, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
+    savings_button.grid(row=4, column=5, padx=5, pady=5)
+
     root.mainloop()
 
 def show_percentage_calculator():
@@ -387,8 +393,11 @@ def show_percentage_calculator():
     second_back_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
     second_back_button.pack(pady=10)
 
-    second_discount_button = tk.Button(root, text='Скидка', width=15, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    second_discount_button = tk.Button(root, text='Скидка', width=20, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
     second_discount_button.pack(pady=10)  # Изменено на pack
+
+    second_savings_button = tk.Button(root, text='Сбережения', width=20, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
+    second_savings_button.pack(pady=10)
 
     entry_percentage.bind("<KeyRelease>", validate_percentage)
 
@@ -474,6 +483,9 @@ def show_discount_calculator():
     back_to_percentage_button = tk.Button(root, text="Проценты", width=20, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
     back_to_percentage_button.pack(pady=10)
 
+    back_to_savings_button = tk.Button(root, text='Сбережения', width=20, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
+    back_to_savings_button.pack(pady=10)
+
 def calculate_discount():
     try:
         price = float(entry_price.get())
@@ -503,6 +515,164 @@ def clear_discount_entries():
     entry_vat.delete(0, tk.END)  # Очищаем поле ввода НДС
     entry_discount_amount.delete(0, tk.END)  # Очищаем поле суммы скидки
     entry_final_price.delete(0, tk.END)  # Очищаем поле итоговой цены
+
+# Новый режим сбережений
+def clear_savings_entries():
+    # Очищаем все поля ввода и вывода
+    target_amount.delete(0, tk.END)
+    interest_rate.delete(0, tk.END)
+    tax_rate.delete(0, tk.END)
+    accumulation_period.delete(0, tk.END)
+    entry_savings_result.delete(0, tk.END)
+    entry_required_contribution.delete(0, tk.END)
+
+def show_savings_calculator():
+    clear()
+
+    global savings_type
+    savings_type = ttk.Combobox(root, values=["Срочный вклад", "Сберегательные взносы"], state='readonly')
+    savings_type.grid(row=0, column=0, padx=10, pady=10)
+    savings_type.current(0)
+
+    global interest_frequency
+    interest_frequency = ttk.Combobox(root, values=["Простые проценты", "Ежемесячно", "Ежеквартально", "Раз в год", "Ежегодно"], state='readonly')
+    interest_frequency.grid(row=1, column=0, padx=10, pady=10)
+    interest_frequency.current(0)
+
+    # Выбор между целевой суммой и суммой вклада
+    global calculation_type
+    calculation_type = tk.StringVar(value="target")  # По умолчанию целевая сумма
+
+    target_radio = tk.Radiobutton(root, text="Целевая сумма", variable=calculation_type, value="target", font=('Arial', 24), bg='lightgray')
+    target_radio.grid(row=2, column=0, padx=10, pady=10, sticky='w')
+
+    contribution_radio = tk.Radiobutton(root, text="Сумма вклада", variable=calculation_type, value="contribution", font=('Arial', 24), bg='lightgray')
+    contribution_radio.grid(row=2, column=1, padx=10, pady=10, sticky='w')
+
+    # Целевая сумма
+    global target_amount
+    target_amount = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    target_amount.grid(row=3, column=0, padx=10, pady=10)
+
+    target_amount_label = tk.Label(root, text="Сумма", font=('Arial', 24), bg='lightgray')
+    target_amount_label.grid(row=3, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Процентная ставка
+    global interest_rate
+    interest_rate = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    interest_rate.grid(row=4, column=0, padx=10, pady=10)
+
+    interest_rate_label = tk.Label(root, text="Процентная ставка (0-100)", font=('Arial', 24), bg='lightgray')
+    interest_rate_label.grid(row=4, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Налоговая ставка
+    global tax_rate
+    tax_rate = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    tax_rate.grid(row=5, column=0, padx=10, pady=10)
+
+    tax_rate_label = tk.Label(root, text="Налоговая ставка (0-100)", font=('Arial', 24), bg='lightgray')
+    tax_rate_label.grid(row=5, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Период накопления
+    global accumulation_period
+    accumulation_period = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    accumulation_period.grid(row=6, column=0, padx=10, pady=10)
+
+    accumulation_period_label = tk.Label(root, text="Период накопления (лет)", font=('Arial', 24), bg='lightgray')
+    accumulation_period_label.grid(row=6, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Кнопка для расчета
+    calculate_savings_button = tk.Button(root, text="Рассчитать", width=20, height=2, command=calculate_savings, bg='darkgray', relief='raised')
+    calculate_savings_button.grid(row=7, column=0, padx=10, pady=10)
+
+    # Кнопка для очистки
+    clear_button = tk.Button(root, text="Очистить", width=20, height=2, command=clear_savings_entries, bg='darkgray', relief='raised')
+    clear_button.grid(row=7, column=1, padx=10, pady=10)
+
+    # Поле для вывода результата
+    global entry_savings_result
+    entry_savings_result = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_savings_result.grid(row=8, column=0, padx=10, pady=10)
+
+    entry_savings_result_label = tk.Label(root, text="Проценты после вычета налогов", font=('Arial', 24), bg='lightgray')
+    entry_savings_result_label.grid(row=8, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Поле для требуемого вклада
+    global entry_required_contribution
+    entry_required_contribution = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_required_contribution.grid(row=9, column=0, padx=10, pady=10)
+
+    entry_required_contribution_label = tk.Label(root, text="Требуемая сумма вклада", font=('Arial', 24), bg='lightgray')
+    entry_required_contribution_label.grid(row=9, column=1, padx=10, pady=10, sticky='e')  # Align right
+
+    # Кнопки навигации
+    back_to_calculator_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
+    back_to_calculator_button.grid(row=10, column=0, padx=10, pady=10, sticky='e')  # Align right
+
+    back_to_converter_button = tk.Button(root, text="Конвертер единиц", width=20, height=2, command=show_converter, bg='darkgray', relief='raised')
+    back_to_converter_button.grid(row=11, column=0, padx=10, pady=10, sticky='e')  # Align right
+
+    back_to_percentage_button = tk.Button(root, text="Проценты", width=20, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
+    back_to_percentage_button.grid(row=12, column=0, padx=10, pady=10, sticky='e')  # Align right
+
+    back_to_discount_button = tk.Button(root, text="Скидка", width=20, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    back_to_discount_button.grid(row=13, column=0, padx=10, pady=10, sticky='e')  # Align right
+
+def calculate_savings():
+    try:
+        amount = float(target_amount.get())
+        interest = float(interest_rate.get())
+        tax = float(tax_rate.get())
+        period = float(accumulation_period.get())
+
+        # Проверка диапазона для процентной ставки
+        if interest < 0 or interest > 100:
+            interest_rate.delete(0, tk.END)
+            entry_savings_result.config(state='normal')
+            entry_savings_result.delete(0, tk.END)
+            entry_savings_result.insert(0, "Ошибка: Процентная ставка вне диапазона (0-100)")
+            return
+
+        # Проверка диапазона для налоговой ставки
+        if tax < 0 or tax > 100:
+            tax_rate.delete(0, tk.END)
+            entry_savings_result.config(state='normal')
+            entry_savings_result.delete(0, tk.END)
+            entry_savings_result.insert(0, "Ошибка: Налоговая ставка вне диапазона (0-100)")
+            return
+
+        if calculation_type.get() == "target":
+            # Расчет для целевой суммы
+            total_interest = amount * (interest / 100) * period
+            total_interest_after_tax = total_interest * (1 - (tax / 100))
+            entry_savings_result.config(state='normal')
+            entry_savings_result.delete(0, tk.END)
+            entry_savings_result.insert(0, f"{total_interest_after_tax:.2f}")
+
+            # Пример расчета требуемого вклада
+            required_contribution = amount / (1 + (interest / 100) * period)
+            entry_required_contribution.config(state='normal')
+            entry_required_contribution.delete(0, tk.END)
+            entry_required_contribution.insert(0, f"{required_contribution:.2f}")
+
+        elif calculation_type.get() == "contribution":
+            # Расчет для суммы вклада
+            total_amount = amount * (1 + (interest / 100) * period)
+            total_amount_after_tax = total_amount * (1 - (tax / 100))
+            entry_savings_result.config(state='normal')
+            entry_savings_result.delete(0, tk.END)
+            entry_savings_result.insert(0, f"{total_amount_after_tax:.2f}")
+
+            # Пример расчета целевой суммы
+            target_amount_value = amount * (1 + (interest / 100) * period)  # Use a different variable name
+            entry_required_contribution.config(state='normal')
+            entry_required_contribution.delete(0, tk.END)
+            entry_required_contribution.insert(0, f"{target_amount_value:.2f}")  # Use the new variable name
+
+    except ValueError:
+        entry_savings_result.config(state='normal')
+        entry_savings_result.delete(0, tk.END)
+        entry_savings_result.insert(0, "Ошибка: Введите корректные числа")
 
 if __name__ == "__main__":
     create_calculator()
