@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import math
+from translate import Translator
 
 # Словарь для хранения единиц измерения по типам
 units = {
@@ -212,6 +213,9 @@ def show_converter():
     savings_button = tk.Button(root, text='Сбережения', width=15, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
     savings_button.pack(pady=10)
 
+    translate_button = tk.Button(root, text='Переводчик', width=20, height=2, command=show_translator, bg='darkgray', relief='raised')
+    translate_button.pack(pady=10)
+
 def convert_units(value, from_unit, to_unit):
     try:
         base_value = float(value)
@@ -266,12 +270,44 @@ def clear_entries():
     entry_from.delete(0, tk.END)  # Очищаем первое поле ввода
     entry_to.delete(0, tk.END)    # Очищаем второе поле ввода
 
+memory_storage = []
+
+def save_to_memory(expression, result):
+    # Сохраняем выражение и результат в память
+    memory_storage.append((expression, result))
+    update_memory_display()
+
+def update_memory_display():
+    # Обновляем выпадающий список с сохраненными результатами
+    memory_combobox['values'] = [f"{expr} = {res}" for expr, res in memory_storage]
+    if memory_storage:
+        memory_combobox.current(len(memory_storage) - 1)  # Устанавливаем последний элемент как выбранный
+
+def load_from_memory(event):
+    # Загружаем выбранный результат в поле ввода
+    selected = memory_combobox.get()
+    if selected:
+        expression = selected.split(' = ')[0]  # Получаем выражение
+        entry.delete(0, tk.END)
+        entry.insert(0, expression)
+
+def calculate():
+    try:
+        expression = entry.get().replace('sqr', '**')
+        result = eval(expression)
+        entry.delete(0, tk.END)
+        entry.insert(0, result)
+        save_to_memory(expression, result)  # Сохраняем результат в память
+    except Exception:
+        entry.delete(0, tk.END)
+        entry.insert(0, "Ошибка")
+
 def create_calculator():
     global root
     if 'root' not in globals() or root is None or not root.winfo_exists():
         root = tk.Tk()
         root.title("Калькулятор")
-        root.configure(bg='lightgray')  # Устанавливаем светло-серый цвет фона окна
+        root.configure(bg='lightgray')
         root.iconbitmap('C:/Users/user/Pictures/CalculatorIcon.ico')
 
     clear()
@@ -279,6 +315,17 @@ def create_calculator():
     global entry
     entry = tk.Entry(root, width=16, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
     entry.grid(row=0, column=0, columnspan=5, padx=10, pady=10)
+
+    # Поле для вывода памяти
+    global memory_combobox
+    memory_combobox = ttk.Combobox(root, state='readonly', width=30)
+    memory_combobox.grid(row=0, column=5, padx=10, pady=10)
+    memory_combobox.bind("<<ComboboxSelected>>", load_from_memory)
+
+    # Кнопка для очистки памяти
+    clear_memory_button = tk.Button(root, text="Очистить память", width=15, height=2, command=clear_memory, bg='darkgray', relief='raised')
+    clear_memory_button.grid(row=1, column=5, padx=10, pady=10)
+
 
     buttons = [
         ('7', 1, 1), ('8', 1, 2), ('9', 1, 3),
@@ -356,7 +403,15 @@ def create_calculator():
     savings_button = tk.Button(root, text='Сбережения', width=15, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
     savings_button.grid(row=4, column=5, padx=5, pady=5)
 
+    translate_button = tk.Button(root, text="Переводчик", width=20, height=2, command=show_translator, bg='darkgray', relief='raised')
+    translate_button.grid(row=3, column=5, padx=10, pady=10, sticky='e')
+
     root.mainloop()
+
+def clear_memory():
+    global memory_storage
+    memory_storage.clear()
+    update_memory_display()
 
 def show_percentage_calculator():
     clear()
@@ -398,6 +453,9 @@ def show_percentage_calculator():
 
     second_savings_button = tk.Button(root, text='Сбережения', width=20, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
     second_savings_button.pack(pady=10)
+
+    second_translate_button = tk.Button(root, text='Переводчик', width=20, height=2, command=show_translator, bg='darkgray', relief='raised')
+    second_translate_button.pack(pady=10)
 
     entry_percentage.bind("<KeyRelease>", validate_percentage)
 
@@ -485,6 +543,9 @@ def show_discount_calculator():
 
     back_to_savings_button = tk.Button(root, text='Сбережения', width=20, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
     back_to_savings_button.pack(pady=10)
+
+    back_to_translate_button = tk.Button(root, text='Переводчик', width=20, height=2, command=show_translator, bg='darkgray', relief='raised')
+    back_to_translate_button.pack(pady=10)
 
 def calculate_discount():
     try:
@@ -618,6 +679,9 @@ def show_savings_calculator():
     back_to_discount_button = tk.Button(root, text="Скидка", width=20, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
     back_to_discount_button.grid(row=13, column=0, padx=10, pady=10, sticky='e')  # Align right
 
+    back_to_translate_button = tk.Button(root, text="Переводчик", width=20, height=2, command=show_translator, bg='darkgray', relief='raised')
+    back_to_translate_button.grid(row=10, column=1, padx=10, pady=10, sticky='e')  # Align right
+
 def calculate_savings():
     try:
         amount = float(target_amount.get())
@@ -673,6 +737,107 @@ def calculate_savings():
         entry_savings_result.config(state='normal')
         entry_savings_result.delete(0, tk.END)
         entry_savings_result.insert(0, "Ошибка: Введите корректные числа")
+
+def show_translator():
+    clear()
+
+    global entry_text
+    entry_text = tk.Entry(root, width=50, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_text.pack(pady=10)
+
+    # Список языков для выбора с названиями на русском
+    global language_options
+    language_options = [
+        ("en", "Английский"),
+        ("ru", "Русский"),
+        ("fr", "Французский"),
+        ("de", "Немецкий"),
+        ("es", "Испанский"),
+        ("it", "Итальянский"),
+        ("pt", "Португальский"),
+        ("zh", "Китайский"),
+        ("ja", "Японский"),
+        ("ko", "Корейский"),
+        ("ar", "Арабский"),
+        ("nl", "Нидерландский"),
+        ("sv", "Шведский"),
+        ("da", "Датский"),
+        ("fi", "Финский"),
+        ("no", "Норвежский"),
+        ("pl", "Польский"),
+        ("tr", "Турецкий"),
+        ("hi", "Хинди"),
+        ("cs", "Чешский")
+    ]
+
+    # Создаем список для отображения названий языков
+    language_names = [name for code, name in language_options]
+
+    global language_from
+    language_from = ttk.Combobox(root, values=language_names, state='readonly')
+    language_from.set("Русский")  # Устанавливаем русский язык по умолчанию
+    language_from.pack(pady=10)
+
+    global language_to
+    language_to = ttk.Combobox(root, values=language_names, state='readonly')
+    language_to.set("Английский")  # Устанавливаем английский язык по умолчанию
+    language_to.pack(pady=10)
+
+    translate_button = tk.Button(root, text="Перевести", width=20, height=2, command=translate_text, bg='darkgray', relief='raised')
+    translate_button.pack(pady=10)
+
+    global entry_translation_result
+    entry_translation_result = tk.Entry(root, width=50, font=('Arial', 24), borderwidth=2, relief="solid", bg='black', fg='white')
+    entry_translation_result.pack(pady=10)
+
+    clear_button = tk.Button(root, text="Очистить", width=20, height=2, command=clear_translation_entries, bg='darkgray', relief='raised')
+    clear_button.pack(pady=10)
+
+    # Кнопки навигации
+    back_to_calculator_button = tk.Button(root, text="Вернуться в калькулятор", width=20, height=2, command=create_calculator, bg='darkgray', relief='raised')
+    back_to_calculator_button.pack(pady=10)
+
+    back_to_converter_button = tk.Button(root, text="Конвертер единиц", width=20, height=2, command=show_converter, bg='darkgray', relief='raised')
+    back_to_converter_button.pack(pady=10)
+
+    back_to_percentage_button = tk.Button(root, text="Проценты", width=20, height=2, command=show_percentage_calculator, bg='darkgray', relief='raised')
+    back_to_percentage_button.pack(pady=10)
+
+    back_to_discount_button = tk.Button(root, text="Скидка", width=20, height=2, command=show_discount_calculator, bg='darkgray', relief='raised')
+    back_to_discount_button.pack(pady=10)
+
+    back_to_savings_button = tk.Button(root, text='Сбережения', width=20, height=2, command=show_savings_calculator, bg='darkgray', relief='raised')
+    back_to_savings_button.pack(pady=10)
+
+def translate_text():
+    try:
+        text_to_translate = entry_text.get()
+        target_language = language_options[language_to.current()][0]  # Получаем код выбранного языка для вывода
+        source_language = language_options[language_from.current()][0]  # Получаем код выбранного языка для ввода
+        
+        # Проверка на пустой ввод
+        if not text_to_translate.strip():
+            entry_translation_result.config(state='normal')
+            entry_translation_result.delete(0, tk.END)
+            entry_translation_result.insert(0, "Введите текст для перевода")
+            return
+
+        # Используем библиотеку Translator
+        translator = Translator(from_lang=source_language, to_lang=target_language)  # Используем выбранные языки
+        translation = translator.translate(text_to_translate)
+        
+        entry_translation_result.config(state='normal')
+        entry_translation_result.delete(0, tk.END)
+        entry_translation_result.insert(0, translation)
+        entry_translation_result.config(state='normal')  # Делаем поле ввода активным
+    except Exception as e:
+        entry_translation_result.config(state='normal')
+        entry_translation_result.delete(0, tk.END)
+        entry_translation_result.insert(0, "Ошибка перевода: " + str(e))  # Если произошла ошибка
+
+def clear_translation_entries():
+    entry_text.delete(0, tk.END)  # Очищаем поле ввода
+    entry_translation_result.delete(0, tk.END)
 
 if __name__ == "__main__":
     create_calculator()
